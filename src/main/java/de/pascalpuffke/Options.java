@@ -7,6 +7,8 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.ParseException;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 
@@ -17,29 +19,54 @@ public class Options {
 			// the way this library tells the user that an argument is missing. (It just throws an exception without
 			// much useful information.)
 			// Apache Commons CLI is horrible. Maybe I'll write a replacement later.
-			Option.builder("i").argName("path").longOpt("input").hasArg().desc("Path to input image file [required]").build(),
-			Option.builder("o").argName("path").longOpt("output").hasArg().desc("Path to output image file [required]").build(),
-			Option.builder("f").argName("filter").longOpt("filter").hasArg().desc("Filter to apply [required]").build(),
-			Option.builder("r").argName("pixels").longOpt("radius").hasArg().desc("Pixel radius used for e.g. blurring filters [default: 10]").build(),
-			Option.builder("p").argName("path|text").longOpt("palette").hasArg().desc("Colour palette used for palette conversion filters").build(),
-			Option.builder().argName("num").longOpt("iterations").hasArg().desc("Number of iterations used for e.g. blurring filters [default: 1]").build(),
-			Option.builder("d").longOpt("debug").desc("Annihilates stdout with useless information, but it looks cool").build(),
-			Option.builder("l").longOpt("list-filters").desc("Lists all available filters").build(),
-			Option.builder("h").longOpt("help").desc("Show help screen").build(),
-			Option.builder("V").longOpt("version").desc("Show version information").build(),
+			Option.builder("i").argName("path").longOpt("input").hasArg()
+					.desc("Path to input image file [required]")
+					.build(),
+			Option.builder("o").argName("path").longOpt("output").hasArg()
+					.desc("Path to output image file [required]")
+					.build(),
+			Option.builder("f").argName("filter").longOpt("filter").hasArg()
+					.desc("Filter to apply [required]")
+					.build(),
+			Option.builder("r").argName("pixels").longOpt("radius").hasArg()
+					.desc("Pixel radius used for blurring filters [default: 10]")
+					.build(),
+			Option.builder("p").argName("path|text").longOpt("palette").hasArg()
+					.desc("Colour palette used for palette conversion filters. Can also be a path to a text file; see README.md for formatting details")
+					.build(),
+			Option.builder().argName("num").longOpt("iterations").hasArg()
+					.desc("Number of iterations used for blurring filters [default: 1]")
+					.build(),
+			Option.builder("d").longOpt("debug")
+					.desc("Annihilates stdout with cool looking, but useless information")
+					.build(),
+			Option.builder("l").longOpt("list-filters")
+					.desc("Lists all available filters")
+					.build(),
+			Option.builder("h").longOpt("help")
+					.desc("Show help screen")
+					.build(),
+			Option.builder("V").longOpt("version")
+					.desc("Show version information")
+					.build(),
 	};
 	private static final org.apache.commons.cli.Options options = new org.apache.commons.cli.Options();
 
 	public static Filters filter;
 	public static Path input, output;
+	public static String palette;
+	public static boolean debug = false;
+	public static int radius = 10, iterations = 1;
 
 	static {
 		Arrays.stream(optionArray).forEach(options::addOption);
 	}
 
-	public static void parseOptions(String... args) throws ParseException {
+	public static void parseOptions(String... args) throws ParseException, IOException {
 		var parser = new DefaultParser();
 		var commandLine = parser.parse(options, args);
+
+		debug = commandLine.hasOption("debug");
 
 		if (commandLine.hasOption("help"))
 			printHelp();
@@ -78,19 +105,39 @@ public class Options {
 		try {
 			input = Path.of(commandLine.getOptionValue("input"));
 			output = Path.of(commandLine.getOptionValue("output"));
-			filter = switch (commandLine.getOptionValue("filter").toLowerCase()) {
-				case "grayscale", "grayscale_perceptual" -> Filters.GRAYSCALE_PERCEPTUAL;
-				case "grayscale_average" -> Filters.GRAYSCALE_AVERAGE;
-				case "grayscale_min" -> Filters.GRAYSCALE_MIN;
-				case "grayscale_max" -> Filters.GRAYSCALE_MAX;
-				default -> null;
-			};
+
+			var filterOption = commandLine.getOptionValue("filter").toUpperCase();
+			for (var f : Filters.values()) {
+				if (filterOption.equals(f.toString())) {
+					filter = f;
+					break;
+				}
+			}
+
+			if (filter == null) {
+				System.err.println("Unknown filter '" + commandLine.getOptionValue("filter") + "'");
+				System.exit(1);
+			}
 		} catch (NullPointerException e) {
 			// We have already notified the user of missing args; ignore the exception and exit.
-			System.exit(0);
-		} catch (Exception e) {
-			// Something else went wrong; print the exception.
-			e.printStackTrace();
+			System.exit(1);
+		}
+
+		radius = Integer.parseInt(commandLine.getOptionValue("radius", "10"));
+		iterations = Integer.parseInt(commandLine.getOptionValue("iterations", "1"));
+
+		if (filter.category.equals(FilterCategory.PALETTE_CONVERSION_FILTERS)) {
+			if (commandLine.hasOption("palette")) {
+				var input = commandLine.getOptionValue("palette");
+				var path = Path.of(input);
+				if (Files.exists(path))
+					palette = Files.readString(path);
+				else
+					palette = input;
+			} else {
+				System.err.println("This filter requires a target palette.");
+				System.exit(1);
+			}
 		}
 	}
 

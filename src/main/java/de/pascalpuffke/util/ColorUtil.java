@@ -4,6 +4,7 @@ public class ColorUtil {
 
 	/**
 	 * I have no idea. Ask Stackoverflow.
+	 *
 	 * @param color
 	 * @return Funny numbers
 	 */
@@ -16,6 +17,7 @@ public class ColorUtil {
 	/**
 	 * Converts a [0; 255] gamma integer to a [0; 1] linear decimal.
 	 * The result is split by color channel and stored in an array.
+	 *
 	 * @param gamma Input gamma integer
 	 * @return Array containing color channels as linear decimal numbers
 	 */
@@ -24,5 +26,15 @@ public class ColorUtil {
 		var g = (double) ((gamma >> 8) & 0xFF) / 255;
 		var b = (double) ((gamma) & 0xFF) / 255;
 		return new double[]{ r, g, b };
+	}
+
+	public static byte[] getColorChannel(int[] colors, int shift) {
+		var len = colors.length;
+		var a = new byte[len];
+
+		for (var i = 0; i < len; i++)
+			a[i] = (byte) ((colors[i] >> shift) & 0xFF);
+
+		return a;
 	}
 }

@@ -9,6 +9,11 @@ import static de.pascalpuffke.util.ColorUtil.sRGBtoLin;
 
 public class GrayscaleFilter {
 
+	// sRGB standard Y chromaticity values
+	private final double WEIGHT_R = 0.2126;
+	private final double WEIGHT_G = 0.7152;
+	private final double WEIGHT_B = 0.0722;
+
 	public enum Method {
 		AVERAGE,
 		MIN,
@@ -24,11 +29,12 @@ public class GrayscaleFilter {
 		var width = input.getWidth();
 		var height = input.getHeight();
 		var matrix = BufferedImageUtil.getMatrix(input);
-		var result = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+		var result = new BufferedImage(width, height, BufferedImage.TYPE_BYTE_GRAY);
 
 		for (var x = 0; x < width; x++) {
 			for (var y = 0; y < height; y++) {
-				var pixel = gammaToLin(matrix[x][y]);
+				// TODO make gammaToLin RGBColor-compatible
+				var pixel = gammaToLin(matrix[x][y].getRgbInt());
 				var r = pixel[0];
 				var g = pixel[1];
 				var b = pixel[2];
@@ -40,7 +46,7 @@ public class GrayscaleFilter {
 					case MIN -> (int)
 							(Math.min(r, Math.min(g, b)) * 255);
 					case PERCEPTUAL -> (int)
-							((0.2126 * sRGBtoLin(r) + 0.7152 * sRGBtoLin(g) + 0.0722 * sRGBtoLin(b)) * 255);
+							((WEIGHT_R * sRGBtoLin(r) + WEIGHT_G * sRGBtoLin(g) + WEIGHT_B * sRGBtoLin(b)) * 255);
 				});
 
 				result.setRGB(x, y, newPixel);
