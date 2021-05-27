@@ -130,13 +130,15 @@ public class Options {
 			System.exit(1);
 		}
 
-		for(var value : commandLine.getOptionValues("filter")) {
-			for(var filter : Filters.values()) {
-				if (value.toUpperCase().equals(filter.toString())) {
-					filters.add(filter);
+		if(commandLine.getOptionValues("filter") != null) {
+			for(var value : commandLine.getOptionValues("filter")) {
+				for(var filter : Filters.values()) {
+					if (value.toUpperCase().equals(filter.toString())) {
+						filters.add(filter);
 
-					logger.debugln("filter = " + filter.toString());
-					break;
+						logger.debugln("filter = " + filter.toString());
+						break;
+					}
 				}
 			}
 		}

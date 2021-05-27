@@ -35,8 +35,10 @@ Options:
 - ```-r```, ```--resize <WxH>```
   
 - ```-rq```, ```--resize-quick <WxH>```
+  - About 5x quicker than regular ```resize```, though quality takes a hit for natural images
   
 - ```--iterations <num>```
+  - Higher amount approximates a Gaussian blur when using the ```box-blur``` filter
   
 - ```--radius <pixels>```
   
@@ -44,6 +46,32 @@ Options:
   - Help also shows when program is run without any arguments
 
 - ```-V```, ```--version```
+
+## Examples
+Resize an image to full HD:
+````shell
+java -jar image.jar --input input.png --output output.png --resize 1920x1080
+````
+
+Blur an image using default settings:
+````shell
+java -jar image.jar --input input.png --output output.png --filter box_blur
+````
+
+Resize, brighten, blurring, dithering and grayscale an image (why would you do this?), all with custom settings and enabling debug messages:
+````shell
+java -jar image.jar \
+--input input.png \
+--output output.png \
+--brighten 20 \
+--filter box_blur \
+--radius 20 \
+--iterations 2 \
+--filter floyd_steinberg \
+--palette palette.txt \
+--filter grayscale \ 
+--debug
+````
 
 ## Filters
 

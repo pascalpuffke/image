@@ -28,21 +28,21 @@ public class BoxBlurFilter {
 	}
 
 	private void blur(int[] in, int[] out, int w, int h, int radius) {
-		int tableSize = 2 * radius + 1;
-		int[] divide = new int[256 * tableSize];
+		var tableSize = 2 * radius + 1;
+		var divide = new int[256 * tableSize];
 
-		for (int i = 0; i < 256 * tableSize; i++) {
+		for (var i = 0; i < 256 * tableSize; i++) {
 			divide[i] = i / tableSize;
 		}
 
-		int inIndex = 0;
+		var inIndex = 0;
 
-		for (int y = 0; y < h; y++) {
-			int outIndex = y;
+		for (var y = 0; y < h; y++) {
+			var outIndex = y;
 			int ta = 0, tr = 0, tg = 0, tb = 0;
 
-			for (int i = -radius; i <= radius; i++) {
-				int rgb = in[inIndex + clamp(i, 0, w - 1)];
+			for (var i = -radius; i <= radius; i++) {
+				var rgb = in[inIndex + clamp(i, 0, w - 1)];
 
 				ta += (rgb >> 24) & 0xFF;
 				tr += (rgb >> 16) & 0xFF;
@@ -50,11 +50,11 @@ public class BoxBlurFilter {
 				tb += rgb & 0xFF;
 			}
 
-			for (int x = 0; x < w; x++) {
+			for (var x = 0; x < w; x++) {
 				out[outIndex] = (divide[ta] << 24) | (divide[tr] << 16) | (divide[tg] << 8) | divide[tb];
 
-				int rgb1 = in[inIndex + Math.min(x + radius + 1, w - 1)];
-				int rgb2 = in[inIndex + Math.max(x - radius, 0)];
+				var rgb1 = in[inIndex + Math.min(x + radius + 1, w - 1)];
+				var rgb2 = in[inIndex + Math.max(x - radius, 0)];
 
 				ta += ((rgb1 >> 24) & 0xFF) - ((rgb2 >> 24) & 0xFF);
 				tr += ((rgb1 & 0xFF0000) - (rgb2 & 0xFF0000)) >> 16;
