@@ -2,6 +2,7 @@ package de.pascalpuffke;
 
 import de.pascalpuffke.filter.FilterCategory;
 import de.pascalpuffke.filter.Filters;
+import de.pascalpuffke.logging.Logger;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
@@ -10,10 +11,16 @@ import org.apache.commons.cli.ParseException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
+/**
+ * nightmare
+ */
 public class Options {
 
+	private static final Logger logger = new Logger("Options");
 	private static final Option[] optionArray = {
 			// Would've loved to use 'required()' instead of manually checking arg presence later, but don't like
 			// the way this library tells the user that an argument is missing. (It just throws an exception without
@@ -26,18 +33,30 @@ public class Options {
 					.desc("Path to output image file [required]")
 					.build(),
 			Option.builder("f").argName("filter").longOpt("filter").hasArg()
-					.desc("Filter to apply [required]")
-					.build(),
-			Option.builder("r").argName("pixels").longOpt("radius").hasArg()
-					.desc("Pixel radius used for blurring filters [default: 10]")
+					.desc("Filter to apply; use '--list-filters' argument for more info.")
 					.build(),
 			Option.builder("p").argName("path|text").longOpt("palette").hasArg()
 					.desc("Colour palette used for palette conversion filters. Can also be a path to a text file; see README.md for formatting details")
 					.build(),
+			Option.builder("b").argName("num").longOpt("brighten").hasArg()
+					.desc("Brighten an image. Num ranges from 0 (no change) to 255 (clip everything white).")
+					.build(),
+			Option.builder("d").argName("num").longOpt("darken").hasArg()
+					.desc("Darken an image. Num ranges from 0 (no change) to 255 (clip everything black).")
+					.build(),
+			Option.builder("r").argName("WxH").longOpt("resize").hasArg()
+					.desc("Resize an image.")
+					.build(),
+			Option.builder("rq").argName("WxH").longOpt("resize-quick").hasArg()
+					.desc("Resize an image, using a faster nearest-neighbor algorithm.")
+					.build(),
+			Option.builder().argName("pixels").longOpt("radius").hasArg()
+					.desc("Pixel radius used for blurring filters [default: 10]")
+					.build(),
 			Option.builder().argName("num").longOpt("iterations").hasArg()
 					.desc("Number of iterations used for blurring filters [default: 1]")
 					.build(),
-			Option.builder("d").longOpt("debug")
+			Option.builder().longOpt("debug")
 					.desc("Annihilates stdout with cool looking, but useless information")
 					.build(),
 			Option.builder("l").longOpt("list-filters")
@@ -52,11 +71,11 @@ public class Options {
 	};
 	private static final org.apache.commons.cli.Options options = new org.apache.commons.cli.Options();
 
-	public static Filters filter;
+	public static List<Filters> filters = new ArrayList<>();
 	public static Path input, output;
 	public static String palette;
-	public static boolean debug = false;
-	public static int radius = 10, iterations = 1;
+	public static boolean debug, resizeQuality;
+	public static int radius, iterations, brighten, darken, width, height;
 
 	static {
 		Arrays.stream(optionArray).forEach(options::addOption);
@@ -99,44 +118,69 @@ public class Options {
 			System.err.println("No input image specified; invoke with argument '--input <path>' or use '--help' for additional information");
 		if (!commandLine.hasOption("output"))
 			System.err.println("No output image specified; invoke with argument '--output <path>' or use '--help' for additional information");
-		if (!commandLine.hasOption("filter"))
-			System.err.println("No filter specified; invoke with argument '--filter <filter>' or use '--help' for additional information");
 
 		try {
 			input = Path.of(commandLine.getOptionValue("input"));
+			logger.debugln("input = " + input.toAbsolutePath().toString());
+
 			output = Path.of(commandLine.getOptionValue("output"));
-
-			var filterOption = commandLine.getOptionValue("filter").toUpperCase();
-			for (var f : Filters.values()) {
-				if (filterOption.equals(f.toString())) {
-					filter = f;
-					break;
-				}
-			}
-
-			if (filter == null) {
-				System.err.println("Unknown filter '" + commandLine.getOptionValue("filter") + "'");
-				System.exit(1);
-			}
+			logger.debugln("output = " + output.toAbsolutePath().toString());
 		} catch (NullPointerException e) {
 			// We have already notified the user of missing args; ignore the exception and exit.
 			System.exit(1);
 		}
 
+		for(var value : commandLine.getOptionValues("filter")) {
+			for(var filter : Filters.values()) {
+				if (value.toUpperCase().equals(filter.toString())) {
+					filters.add(filter);
+
+					logger.debugln("filter = " + filter.toString());
+					break;
+				}
+			}
+		}
+
 		radius = Integer.parseInt(commandLine.getOptionValue("radius", "10"));
 		iterations = Integer.parseInt(commandLine.getOptionValue("iterations", "1"));
+		brighten = Integer.parseInt(commandLine.getOptionValue("brighten", "0"));
+		darken = Integer.parseInt(commandLine.getOptionValue("darken", "0"));
+		resizeQuality = commandLine.hasOption("resize");
 
-		if (filter.category.equals(FilterCategory.PALETTE_CONVERSION_FILTERS)) {
-			if (commandLine.hasOption("palette")) {
-				var input = commandLine.getOptionValue("palette");
-				var path = Path.of(input);
-				if (Files.exists(path))
-					palette = Files.readString(path);
-				else
-					palette = input;
-			} else {
-				System.err.println("This filter requires a target palette.");
-				System.exit(1);
+		logger.debugln("radius = " + radius);
+		logger.debugln("iterations = " + iterations);
+		logger.debugln("brighten = " + brighten);
+		logger.debugln("darken = " + darken);
+		logger.debugln("resizeQuality = " + resizeQuality);
+
+		var size = commandLine.getOptionValue("resize") == null ?
+				commandLine.getOptionValue("resize-quick") : commandLine.getOptionValue("resize");
+		if (size.contains("x")) {
+			var temp = size.split("x");
+
+			width = Integer.parseInt(temp[0]);
+			height = Integer.parseInt(temp[1]);
+		} else {
+			width = Integer.parseInt(size);
+		}
+
+		logger.debugln("width = " + width);
+		logger.debugln("height = " + height);
+
+		for(var filter : filters) {
+			if(filter.category.equals(FilterCategory.PALETTE_CONVERSION_FILTERS)) {
+				if (commandLine.hasOption("palette")) {
+					var input = commandLine.getOptionValue("palette");
+					var path = Path.of(input);
+					if (Files.exists(path))
+						palette = Files.readString(path);
+					else
+						palette = input;
+				} else {
+					System.err.println("This filter requires a target palette.");
+					System.exit(1);
+				}
+				break;
 			}
 		}
 	}

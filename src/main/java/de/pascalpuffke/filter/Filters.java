@@ -19,12 +19,7 @@ public enum Filters {
 			"Converts an image to another palette, without applying any error diffusion."),
 	BOX_BLUR(BLUR_FILTERS,
 			"Applies a box blur. To approximate a Gaussian blur, use more iterations."),
-	RESIZE(RESIZING_FILTERS,
-			"Resizes an image. Macro for resize_quality."),
-	RESIZE_FAST(RESIZING_FILTERS,
-			"Resizes an image. Uses a faster nearest-neighbor algorithm."),
-	RESIZE_QUALITY(RESIZING_FILTERS,
-			"Resizes an image. Tries to preserve quality.");
+	;
 
 	public final FilterCategory category;
 	public final String description;

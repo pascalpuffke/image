@@ -1,5 +1,8 @@
 package de.pascalpuffke.color;
 
+import static de.pascalpuffke.util.MathUtil.maxClamp;
+import static de.pascalpuffke.util.MathUtil.minClamp;
+
 public class RGBColor {
 
 	private int r, g, b;
@@ -30,11 +33,27 @@ public class RGBColor {
 		return a;
 	}
 
+	public RGBColor addClamped(int num) {
+		var a = new RGBColor();
+		a.r = maxClamp(255, this.r + num);
+		a.g = maxClamp(255, this.g + num);
+		a.b = maxClamp(255, this.b + num);
+		return a;
+	}
+
 	public RGBColor sub(RGBColor other) {
 		var a = new RGBColor();
 		a.r = this.r - other.r;
 		a.g = this.g - other.g;
 		a.b = this.b - other.b;
+		return a;
+	}
+
+	public RGBColor subClamped(int num) {
+		var a = new RGBColor();
+		a.r = minClamp(0, this.r - num);
+		a.g = minClamp(0, this.g - num);
+		a.b = minClamp(0, this.b - num);
 		return a;
 	}
 

@@ -1,7 +1,51 @@
 # image
 Command-line image manipulation tools
 
-## Features
+## Usage
+JRE 16 is **required**, older versions are not supported. That fact alone should be enough for you not to consider actually using this thing.
+And yes, I do use some newer language features.
+
+````shell
+java -jar image.jar [--input input_image] [--output output_image] [options]
+````
+
+Download a pre-compiled jar file from [Releases](https://github.com/pascalpuffke/image/releases) or use the maven ```package``` command.
+
+I may eventually try using jpackage to compile regular executables, but for now you'll have to do it this way.
+
+Options:
+
+- ```-i```, ```--input <path>```
+  
+- ```-o```, ```--output <path>```
+  
+- ```-b```, ```--brighten <amount>```
+  - Values range from 0 (no change) to 255 (clip everything white)
+  
+- ```-d```, ```--darken <amount>```
+  - Values range from 0 (no change) to 255 (clip everything black)
+  
+- ```-f```, ```--filter <filter>```
+  - See **Filters** section below
+
+- ```-l```, ```--list-filters```
+  
+- ```-p```, ```--palette <path|text>```
+  
+- ```-r```, ```--resize <WxH>```
+  
+- ```-rq```, ```--resize-quick <WxH>```
+  
+- ```--iterations <num>```
+  
+- ```--radius <pixels>```
+  
+- ```-h```, ```--help```
+  - Help also shows when program is run without any arguments
+
+- ```-V```, ```--version```
+
+## Filters
 
 - Grayscale conversion
     - ```grayscale```, ```grayscale_average```, ```grayscale_min```, ```grayscale_max```, ```grayscale_perceptual```
@@ -13,8 +57,11 @@ Command-line image manipulation tools
   - ```box_blur```
   
 - Resizing
-  - ```resize```, ```resize_fast```, ```resize_quality```
+  - ```resize```, ```resize_fast```
   
+- Brightness correction
+  - ```brighten```, ```darken```
+
 ## Filter parameters
 
 - Grayscale filters require no additional configuration.

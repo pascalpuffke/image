@@ -10,9 +10,10 @@ import static de.pascalpuffke.util.ColorUtil.sRGBtoLin;
 public class GrayscaleFilter {
 
 	// sRGB standard Y chromaticity values
-	private final double WEIGHT_R = 0.2126;
-	private final double WEIGHT_G = 0.7152;
-	private final double WEIGHT_B = 0.0722;
+	private final double
+			WEIGHT_R = 0.2126,
+			WEIGHT_G = 0.7152,
+			WEIGHT_B = 0.0722;
 
 	public enum Method {
 		AVERAGE,

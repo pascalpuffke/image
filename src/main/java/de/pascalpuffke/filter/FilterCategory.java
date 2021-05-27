@@ -11,8 +11,7 @@ public enum FilterCategory {
 			"Convert images to another color palette. These filters *require* specifying a palette."),
 	BLUR_FILTERS(
 			"Blurring filters. Optional arguments include '--radius' and '--iterations'."),
-	RESIZING_FILTERS(
-			"Resizing (scaling) images. Requires target dimensions 'WIDTHxHEIGHT' or size of longest side.");
+	;
 
 	public String description;
 
