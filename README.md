@@ -63,6 +63,7 @@ Resize, brighten, blurring, dithering and grayscale an image (why would you do t
 java -jar image.jar \
 --input input.png \
 --output output.png \
+--resize 1366x768 \
 --brighten 20 \
 --filter box_blur \
 --radius 20 \
