@@ -155,13 +155,15 @@ public class Options {
 
 		var size = commandLine.getOptionValue("resize") == null ?
 				commandLine.getOptionValue("resize-quick") : commandLine.getOptionValue("resize");
-		if (size.contains("x")) {
-			var temp = size.split("x");
+		if(size != null) {
+			if (size.contains("x")) {
+				var temp = size.split("x");
 
-			width = Integer.parseInt(temp[0]);
-			height = Integer.parseInt(temp[1]);
-		} else {
-			width = Integer.parseInt(size);
+				width = Integer.parseInt(temp[0]);
+				height = Integer.parseInt(temp[1]);
+			} else {
+				width = Integer.parseInt(size);
+			}
 		}
 
 		logger.debugln("width = " + width);

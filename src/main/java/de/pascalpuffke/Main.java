@@ -70,7 +70,7 @@ public class Main {
 			var brightnessCorrection = new BrightnessCorrection();
 
 			image = brightnessCorrection.darken(temp, value);
-			logger.debugln("Change brightness to -" + Options.darken);
+			logger.debugln("Change brightness to -" + value);
 		}
 
 		// Applying filters
