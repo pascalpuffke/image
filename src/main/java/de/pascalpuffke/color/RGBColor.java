@@ -26,35 +26,31 @@ public class RGBColor {
 	}
 
 	public RGBColor add(RGBColor other) {
-		var a = new RGBColor();
-		a.r = this.r + other.r;
-		a.g = this.g + other.g;
-		a.b = this.b + other.b;
-		return a;
+		this.r = this.r + other.r;
+		this.g = this.g + other.g;
+		this.b = this.b + other.b;
+		return this;
 	}
 
 	public RGBColor addClamped(int num) {
-		var a = new RGBColor();
-		a.r = maxClamp(255, this.r + num);
-		a.g = maxClamp(255, this.g + num);
-		a.b = maxClamp(255, this.b + num);
-		return a;
+		this.r = maxClamp(255, this.r + num);
+		this.g = maxClamp(255, this.g + num);
+		this.b = maxClamp(255, this.b + num);
+		return this;
 	}
 
 	public RGBColor sub(RGBColor other) {
-		var a = new RGBColor();
-		a.r = this.r - other.r;
-		a.g = this.g - other.g;
-		a.b = this.b - other.b;
-		return a;
+		this.r = this.r - other.r;
+		this.g = this.g - other.g;
+		this.b = this.b - other.b;
+		return this;
 	}
 
 	public RGBColor subClamped(int num) {
-		var a = new RGBColor();
-		a.r = minClamp(0, this.r - num);
-		a.g = minClamp(0, this.g - num);
-		a.b = minClamp(0, this.b - num);
-		return a;
+		this.r = minClamp(0, this.r - num);
+		this.g = minClamp(0, this.g - num);
+		this.b = minClamp(0, this.b - num);
+		return this;
 	}
 
 	public RGBColor mul(double multiplier) {

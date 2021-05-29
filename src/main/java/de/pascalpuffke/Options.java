@@ -9,6 +9,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.ParseException;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -121,10 +122,10 @@ public class Options {
 
 		try {
 			input = Path.of(commandLine.getOptionValue("input"));
-			logger.debugln("input = " + input.toAbsolutePath().toString());
+			logger.debugln("input = " + input.toAbsolutePath());
 
 			output = Path.of(commandLine.getOptionValue("output"));
-			logger.debugln("output = " + output.toAbsolutePath().toString());
+			logger.debugln("output = " + output.toAbsolutePath());
 		} catch (NullPointerException e) {
 			// We have already notified the user of missing args; ignore the exception and exit.
 			System.exit(1);
@@ -136,7 +137,7 @@ public class Options {
 					if (value.toUpperCase().equals(filter.toString())) {
 						filters.add(filter);
 
-						logger.debugln("filter = " + filter.toString());
+						logger.debugln("filter = " + filter);
 						break;
 					}
 				}
@@ -177,7 +178,7 @@ public class Options {
 					var input = commandLine.getOptionValue("palette");
 					var path = Path.of(input);
 					if (Files.exists(path))
-						palette = Files.readString(path);
+						palette = Files.readString(path, StandardCharsets.UTF_8);
 					else
 						palette = input;
 				} else {

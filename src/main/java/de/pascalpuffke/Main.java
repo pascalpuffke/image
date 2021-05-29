@@ -108,6 +108,7 @@ public class Main {
 
 	private static int[] readPalette(String s) {
 		var result = new ArrayList<Integer>();
+		// TODO Fix NumberFormatException " under radix 16ead
 		if (s.contains("\n")) {
 			for (var line : s.split("\n")) {
 				result.add(parseIntFromPaletteEntry(line));
